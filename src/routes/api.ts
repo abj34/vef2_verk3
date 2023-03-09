@@ -1,22 +1,39 @@
-import express, { Request, Response, NextFunction } from 'express';
-import { sayHello } from '../lib/hello.js';
+import express, { Request, Response } from 'express';
+import { 
+  listDepartments, 
+  getDepartment, 
+  createDepartment, 
+  updateDepartment, 
+  deleteDepartment
+ } from './departments.js';
 
 export const router = express.Router();
 
-export async function hello(req: Request, res: Response, next: NextFunction) {
-  res.json({ hello: sayHello('world') });
-  next();
+export async function index(req: Request, res: Response) {
+  return res.json([
+    {
+      href: '/departments',
+      methods: ['GET',]
+    },
+    {
+      href: '/departments/:slug',
+      methods: ['GET',]
+    },
+    {
+      href: '/departments/:slug/courses',
+      methods: []
+    },
+    {
+      href: '/departments/:slug/courses/:courseId',
+      methods: []
+    },
+  ])
 }
 
-export async function bye() {
-  console.log('done');
-}
 
-export async function error() {
-  throw new Error('error');
-}
-
-router.get('/test', hello, bye);
-
-// Mun crasha öllu
-router.get('/error', error);
+router.get('/', index);
+router.get('/departments', listDepartments);
+router.post('/departments', createDepartment);
+router.get('/departments/:slug', getDepartment);
+router.patch('/departments/:slug', updateDepartment);
+router.delete('/departments/:slug', deleteDepartment);
