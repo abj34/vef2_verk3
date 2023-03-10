@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
+import { createCourse, deleteCourse, getCourse, listCourses, patchCourse } from './courses.js';
 import { 
   listDepartments, 
   getDepartment, 
   createDepartment, 
-  updateDepartment, 
+  patchDepartment, 
   deleteDepartment
  } from './departments.js';
 
@@ -30,10 +31,18 @@ export async function index(req: Request, res: Response) {
   ])
 }
 
-
 router.get('/', index);
+
+// Departments
 router.get('/departments', listDepartments);
 router.post('/departments', createDepartment);
 router.get('/departments/:slug', getDepartment);
-router.patch('/departments/:slug', updateDepartment);
+router.patch('/departments/:slug', patchDepartment);
 router.delete('/departments/:slug', deleteDepartment);
+
+// Courses 
+router.get('/departments/:slug/courses', listCourses);
+router.post('/departments/:slug/courses', createCourse);
+router.get('/departments/:slug/courses/:courseId', getCourse);
+router.post('/departments/:slug/courses/:courseId', patchCourse);
+router.delete('/departments/:slug/courses/:courseId', deleteCourse);

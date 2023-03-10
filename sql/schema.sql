@@ -2,21 +2,23 @@ CREATE TABLE public.departments (
   id SERIAL PRIMARY KEY,
   title VARCHAR(64) NOT NULL UNIQUE,
   slug VARCHAR(64) NOT NULL UNIQUE,
-  description TEXT,
+  description TEXT DEFAULT '',
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TYPE semester AS ENUM ('Vor', 'Sumar', 'Haust', 'Heilsárs');
 
 CREATE TABLE public.courses (
   id SERIAL PRIMARY KEY,
   courseId VARCHAR(64) NOT NULL UNIQUE,
   title VARCHAR(256) NOT NULL UNIQUE,
-  points INTEGER NOT NULL,
-  semester VARCHAR(64) NOT NULL,
-  degree VARCHAR(64) NOT NULL,
-  url character varying(256),
-  department INTEGER NOT NULL,
+  units REAL NOT NULL CONSTRAINT units_check CHECK (units > 0),
+  semester semester NOT NULL,
+  level VARCHAR(128) DEFAULT NULL,
+  url character varying(256) DEFAULT NULL,
+  departmentId INTEGER NOT NULL,
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT department FOREIGN KEY (department) REFERENCES departments (id)
+  CONSTRAINT department FOREIGN KEY (departmentId) REFERENCES departments (id)
 );
