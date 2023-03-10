@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { createCourse, deleteCourse, getCourse, listCourses, patchCourse } from './courses.js';
+import { createCourse, deleteCourse, getCourse, listAllCourses, listCourses, patchCourse } from './courses.js';
 import { 
   listDepartments, 
   getDepartment, 
@@ -13,20 +13,29 @@ export const router = express.Router();
 export async function index(req: Request, res: Response) {
   return res.json([
     {
+      description: 'Every single department in table departments',
       href: '/departments',
-      methods: ['GET',]
+      methods: ['GET','POST']
     },
     {
+      description: 'Specific department',
       href: '/departments/:slug',
-      methods: ['GET',]
+      methods: ['GET','PATCH','DELETE']
     },
     {
+      description: 'Every single course in table courses',
+      href: '/courses',
+      methods: ['GET']
+    },
+    {
+      description: 'All courses in specific department',
       href: '/departments/:slug/courses',
-      methods: []
+      methods: ['GET','POST']
     },
     {
+      description: 'Specific course',
       href: '/departments/:slug/courses/:courseId',
-      methods: []
+      methods: ['GET','PATCH','DELETE']
     },
   ])
 }
@@ -41,8 +50,9 @@ router.patch('/departments/:slug', patchDepartment);
 router.delete('/departments/:slug', deleteDepartment);
 
 // Courses 
+router.get('/courses', listAllCourses);
 router.get('/departments/:slug/courses', listCourses);
 router.post('/departments/:slug/courses', createCourse);
 router.get('/departments/:slug/courses/:courseId', getCourse);
-router.post('/departments/:slug/courses/:courseId', patchCourse);
+router.patch('/departments/:slug/courses/:courseId', patchCourse);
 router.delete('/departments/:slug/courses/:courseId', deleteCourse);

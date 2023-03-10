@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { QueryResult } from 'pg';
 import { stringValidator, xssSanitizer } from '../lib/validator.js';
-import { addCourse, query, removeCourse } from '../lib/db.js';
+import { addCourse, getCourseByCourseId, query, removeCourse, updateTables } from '../lib/db.js';
 
 
 export type Course = {
@@ -30,8 +30,6 @@ export function courseMapper(
         !potentialCourse.title ||
         !potentialCourse.units ||
         !potentialCourse.semester ||
-        !potentialCourse.level ||
-        !potentialCourse.url ||
         !potentialCourse.departmentid ||
         !potentialCourse.created || !potentialCourse.updated
     ) { 
@@ -77,7 +75,16 @@ export function mapDbCoursesToCourses(
     return mappedCourses.filter((i): i is Course => Boolean(i));
 }
 
-// Sýnir alla kennslutíma
+// Sýnir alla kennslutíma sem til eru
+export async function listAllCourses(req: Request, res: Response, next: NextFunction) {
+    const courseResult = await query('SELECT * FROM courses;');
+  
+    const courses = mapDbCoursesToCourses(courseResult);
+    
+    res.json(courses);
+}
+
+// Sýnir alla kennslutíma í deild
 export async function listCourses(req: Request, res: Response, next: NextFunction) {
     const { slug } = req.params;
     const departmentResult = await query(`SELECT * FROM departments WHERE slug = $1;`, [slug]);
@@ -133,7 +140,47 @@ export async function createCourseHandler(req: Request, res: Response, next: Nex
 
 // Uppfææra einn kennslutíma
 export async function updateCourseHandler(req: Request, res: Response, next: NextFunction) {
-    
+    const { courseId } = req.params;
+    const course = await getCourseByCourseId(courseId);
+
+    if (!course) {
+        return next();
+    }
+
+    const { courseid, title, units, semester, level, url, departmentid } = req.body;
+
+    const fields = [
+        typeof courseid === 'string' && courseid ? 'courseid' : null,
+        typeof title === 'string' && title ? 'title' : null,
+        typeof units === 'number' && units ? 'units' : null,
+        typeof semester === 'string' && semester ? 'semester' : null,
+        typeof level === 'string' && level ? 'level' : null,
+        typeof url === 'string' && url ? 'url' : null,
+        typeof departmentid === 'string' && departmentid ? 'departmentid' : null,
+    ];
+
+    const values = [
+        typeof courseid === 'string' && courseid ? courseid : null,
+        typeof title === 'string' && title ? title : null,
+        typeof units === 'number' && units ? units : null,
+        typeof semester === 'string' && semester ? semester : null,
+        typeof level === 'string' && level ? level : null,
+        typeof url === 'string' && url ? url : null,
+        typeof departmentid === 'string' && departmentid ? departmentid : null,
+    ];
+
+    const updated = await updateTables(
+        'courses',
+        course.id,
+        fields,
+        values,
+    );
+
+    if (!updated) {
+        return next(new Error('Unable to update course'));
+    }
+
+    return res.json(updated);
 }
 
 // Fjarlægja eina kennslutíma
@@ -155,7 +202,7 @@ export const createCourse = [
 ];
 
 export const patchCourse = [
-    
+    updateCourseHandler,
 ];
 
 export const deleteCourse = [

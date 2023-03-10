@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { addDepartment, getDepartmentsBySlug, query, removeDepartment, updateDepartment } from '../lib/db.js';
+import { addDepartment, getDepartmentsBySlug, query, removeAllCoursesFromDepartment, removeDepartment, updateTables } from '../lib/db.js';
 import { QueryResult } from 'pg';
 import { stringValidator, xssSanitizer } from '../lib/validator.js';
 import { slugify } from '../lib/slugify.js';
@@ -24,7 +24,6 @@ export function departmentMapper(
         !potentialDepartment.id ||
         !potentialDepartment.title ||
         !potentialDepartment.slug ||
-        !potentialDepartment.description ||
         !potentialDepartment.created || !potentialDepartment.updated
     ) { 
         return null; 
@@ -132,7 +131,7 @@ export async function updateDepartmentHandler(req: Request, res: Response, next:
         typeof description === 'string' && description ? description : null,
     ];
 
-    const updated = await updateDepartment(
+    const updated = await updateTables(
         'departments',
         department.id,
         fields,
@@ -149,6 +148,11 @@ export async function updateDepartmentHandler(req: Request, res: Response, next:
 // Fjarlægir eina deild
 export async function deleteDepartmentHandler(req: Request, res: Response, next: NextFunction) {
     const { slug } = req.params;
+    const department = await getDepartmentsBySlug(slug);
+
+    if (department) {
+        await removeAllCoursesFromDepartment(department.id);
+    }
     
     const deletedDepartment = await removeDepartment(slug);
 

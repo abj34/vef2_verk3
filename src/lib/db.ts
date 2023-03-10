@@ -56,8 +56,74 @@ export async function addDepartment(department: Omit<Department, "id">, silent?:
   return result.rows[0];
 }
 
-// UPDATE DEPARTMENT
-export async function updateDepartment(
+// DELETE DEPARTMENT
+export async function removeDepartment(slug: string): Promise<boolean> {
+  const q = `
+    DELETE FROM departments
+    WHERE slug = $1
+  `;
+  const values = [slug];
+  const result = await query(q, values);
+
+  if (!result) {
+    return false;
+  }
+
+  return true;
+}
+
+// DELETE ALL COURSES FROM DEPARTMENT
+export async function removeAllCoursesFromDepartment(id: number): Promise<boolean> {
+  const q = `
+    DELETE FROM courses
+    WHERE departmentId = $1
+  `;
+
+  const values = [id];
+  const result = await query(q, values);
+
+  if (!result) {
+    return false;
+  }
+
+  return true;
+}
+
+// CREATE COURSE
+export async function addCourse(course: Omit<Course, "id">, silent?: boolean): Promise<Course | null> {
+  const q = `
+    INSERT INTO courses (courseId, title, units, semester, level, url, departmentId)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING *
+  `;
+  const values = [course.courseid, course.title, course.units, course.semester, course.level, course.url, course.departmentid];
+  const result = await query(q, values);
+
+  if (!result) {
+    return null;
+  }
+
+  return result.rows[0];
+}
+
+// DELETE COURSE
+export async function removeCourse(courseId: string): Promise<boolean> {
+  const q = `
+    DELETE FROM courses
+    WHERE courseId = $1
+  `;
+  const values = [courseId];
+  const result = await query(q, values);
+
+  if (!result) {
+    return false;
+  }
+
+  return true;
+}
+
+// UPDATE TABLES
+export async function updateTables(
   table: 'departments' | 'courses',
   id: number,
   fields: Array<string | null>,
@@ -90,59 +156,9 @@ export async function updateDepartment(
     [id] as Array<string | number>
   ).concat(filteredValues);
   const result = await query(q, queryValues);
+  console.log(queryValues);
 
   return result;
-}
-
-// DELETE DEPARTMENT
-export async function removeDepartment(slug: string): Promise<boolean> {
-  const q = `
-    DELETE FROM departments
-    WHERE slug = $1
-  `;
-  const values = [slug];
-  const result = await query(q, values);
-
-  if (!result) {
-    return false;
-  }
-
-  return true;
-}
-
-// CREATE COURSE
-export async function addCourse(course: Omit<Course, "id">, silent?: boolean): Promise<Course | null> {
-  const q = `
-    INSERT INTO courses (courseId, title, units, semester, level, url, departmentId)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    RETURNING *
-  `;
-  const values = [course.courseid, course.title, course.units, course.semester, course.level, course.url, course.departmentid];
-  const result = await query(q, values);
-
-  if (!result) {
-    return null;
-  }
-
-  return result.rows[0];
-}
-
-// UPDATE COURSE
-
-// DELETE COURSE
-export async function removeCourse(courseId: string): Promise<boolean> {
-  const q = `
-    DELETE FROM courses
-    WHERE courseId = $1
-  `;
-  const values = [courseId];
-  const result = await query(q, values);
-
-  if (!result) {
-    return false;
-  }
-
-  return true;
 }
 
 // GET DEPARTMENT BY SLUG
@@ -177,7 +193,21 @@ export async function getDepartmentIdByDepartmentSlug(slug: string): Promise<Arr
   return result.rows;
 }
 
+// GET COURSE BY COURSE ID
+export async function getCourseByCourseId(courseId: string): Promise<Course | null> {
+  const q = `
+    SELECT * FROM courses
+    WHERE courseId = $1
+  `;
+  const values = [courseId];
+  const result = await query(q, values);
 
+  if (!result) {
+    return null;
+  }
+
+  return result.rows[0];
+}
 
 export async function end() {
   await pool.end();
