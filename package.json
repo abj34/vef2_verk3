@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "nodemon",
     "start": "node --loader ts-node/esm ./src/app.ts",
+    "setup": "node --loader ts-node/esm ./src/setup/setup.ts",
     "prettier": "prettier --write .",
-    "lint": "concurrently npm:lint:*",
-    "lint:eslint": "eslint ./src/**/*.ts"
+    "lint": "eslint ./src"
   },
   "keywords": [],
   "author": "",

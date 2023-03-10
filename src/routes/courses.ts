@@ -12,7 +12,7 @@ export type Course = {
     semester: string;
     level?: string;
     url?: string;
-    departmentid: string;
+    departmentid: number;
     created?: Date;
     updated?: Date;
 }

@@ -32,3 +32,18 @@ export const stringValidator = ({
 
 export const xssSanitizer = (param: string) =>
     body(param).customSanitizer((v) => xss(v));
+
+export const valueToSementer = (semester: string | undefined) => {
+    switch (semester) {
+        case 'Haust':
+            return 'Haust';
+        case 'Vor':
+            return 'Vor';
+        case 'Sumar':
+            return 'Sumar';
+        case 'Heilsárs':
+            return 'Heilsárs';
+        default:
+            return undefined;
+    }
+}

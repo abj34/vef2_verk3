@@ -1,4 +1,3 @@
-import { readFile } from 'fs/promises';
 import pg from 'pg';
 import { Course } from '../routes/courses';
 import { Department } from '../routes/departments';
@@ -34,10 +33,6 @@ export async function query(q: string, values: Array<QueryInput> = []) {
       client.release();
     }
 }
-
-// CREATE SCHEMA
-
-// DROP SCHEMA
 
 // CREATE DEPARTMENT
 export async function addDepartment(department: Omit<Department, "id">, silent?: boolean): Promise<Department | null> {
@@ -209,6 +204,6 @@ export async function getCourseByCourseId(courseId: string): Promise<Course | nu
   return result.rows[0];
 }
 
-export async function end() {
+export async function poolEnd() {
   await pool.end();
 }
